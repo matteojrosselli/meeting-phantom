@@ -1,0 +1,354 @@
+openapi: 3.0.3
+info:
+  title: Meeting Phantom - Meetings API
+  version: 1.0.0
+  description: Meeting management and processing endpoints
+
+paths:
+  /api/meetings:
+    get:
+      summary: List user meetings
+      tags: [Meetings]
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [scheduled, in_progress, completed, failed, skipped]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Meetings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meetings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Meeting'
+                  total:
+                    type: integer
+                  hasMore:
+                    type: boolean
+
+    post:
+      summary: Create or sync meeting from Zoom
+      tags: [Meetings]
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeetingRequest'
+      responses:
+        '201':
+          description: Meeting created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meeting'
+        '400':
+          description: Invalid meeting data
+
+  /api/meetings/{meetingId}:
+    get:
+      summary: Get meeting details
+      tags: [Meetings]
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: meetingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Meeting details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingDetails'
+        '404':
+          description: Meeting not found
+
+    patch:
+      summary: Update meeting settings
+      tags: [Meetings]
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: meetingId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isExcluded:
+                  type: boolean
+      responses:
+        '200':
+          description: Meeting updated successfully
+
+  /api/meetings/{meetingId}/transcript:
+    get:
+      summary: Get meeting transcript
+      tags: [Meetings]
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: meetingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transcript retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transcript'
+        '404':
+          description: Transcript not found
+
+  /api/meetings/{meetingId}/summary:
+    get:
+      summary: Get meeting summary
+      tags: [Meetings]
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: meetingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Summary'
+        '404':
+          description: Summary not found
+
+  /api/webhooks/zoom:
+    post:
+      summary: Handle Zoom webhooks
+      tags: [Webhooks]
+      security:
+        - ZoomWebhook: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed successfully
+
+components:
+  schemas:
+    Meeting:
+      type: object
+      properties:
+        id:
+          type: string
+        zoomMeetingId:
+          type: string
+        title:
+          type: string
+        scheduledStart:
+          type: string
+          format: date-time
+        actualStart:
+          type: string
+          format: date-time
+        actualEnd:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed, failed, skipped]
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+        isExcluded:
+          type: boolean
+        botJoined:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    MeetingDetails:
+      allOf:
+        - $ref: '#/components/schemas/Meeting'
+        - type: object
+          properties:
+            transcript:
+              $ref: '#/components/schemas/Transcript'
+            summary:
+              $ref: '#/components/schemas/Summary'
+            actionItems:
+              type: array
+              items:
+                $ref: '#/components/schemas/ActionItem'
+
+    CreateMeetingRequest:
+      type: object
+      required:
+        - zoomMeetingId
+        - title
+        - scheduledStart
+        - meetingUrl
+      properties:
+        zoomMeetingId:
+          type: string
+        title:
+          type: string
+        scheduledStart:
+          type: string
+          format: date-time
+        meetingUrl:
+          type: string
+          format: uri
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+
+    Transcript:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [processing, completed, failed]
+        language:
+          type: string
+        speakers:
+          type: array
+          items:
+            type: object
+        segments:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              speaker:
+                type: string
+              text:
+                type: string
+              confidence:
+                type: number
+        confidence:
+          type: number
+        duration:
+          type: integer
+        wordCount:
+          type: integer
+
+    Summary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        overview:
+          type: string
+        keyPoints:
+          type: array
+          items:
+            type: string
+        decisions:
+          type: array
+          items:
+            type: string
+        nextSteps:
+          type: array
+          items:
+            type: string
+        attendees:
+          type: array
+          items:
+            type: object
+        generatedAt:
+          type: string
+          format: date-time
+
+    ActionItem:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        assignee:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high]
+        status:
+          type: string
+          enum: [pending, completed, cancelled]
+        confidence:
+          type: number
+        sourceSegment:
+          type: string
+
+  securitySchemes:
+    ClerkAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ZoomWebhook:
+      type: apiKey
+      in: header
+      name: x-zm-signature

@@ -1,0 +1,166 @@
+openapi: 3.0.3
+info:
+  title: Meeting Phantom - Authentication API
+  version: 1.0.0
+  description: User authentication and OAuth integration endpoints
+
+paths:
+  /api/auth/profile:
+    get:
+      summary: Get current user profile
+      tags: [Authentication]
+      security:
+        - ClerkAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+
+  /api/auth/integrations:
+    get:
+      summary: Get user integration status
+      tags: [Authentication]
+      security:
+        - ClerkAuth: []
+      responses:
+        '200':
+          description: Integration status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationStatus'
+
+  /api/auth/zoom/connect:
+    post:
+      summary: Initiate Zoom OAuth connection
+      tags: [Authentication]
+      security:
+        - ClerkAuth: []
+      responses:
+        '200':
+          description: OAuth URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authUrl:
+                    type: string
+                    format: uri
+
+  /api/auth/zoom/callback:
+    post:
+      summary: Handle Zoom OAuth callback
+      tags: [Authentication]
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                state:
+                  type: string
+      responses:
+        '200':
+          description: OAuth connection successful
+        '400':
+          description: Invalid OAuth callback
+
+  /api/auth/gmail/connect:
+    post:
+      summary: Initiate Gmail OAuth connection
+      tags: [Authentication]
+      security:
+        - ClerkAuth: []
+      responses:
+        '200':
+          description: OAuth URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authUrl:
+                    type: string
+                    format: uri
+
+  /api/auth/gmail/callback:
+    post:
+      summary: Handle Gmail OAuth callback
+      tags: [Authentication]
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                state:
+                  type: string
+      responses:
+        '200':
+          description: OAuth connection successful
+        '400':
+          description: Invalid OAuth callback
+
+components:
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        zoomConnected:
+          type: boolean
+        gmailConnected:
+          type: boolean
+        preferences:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    IntegrationStatus:
+      type: object
+      properties:
+        zoom:
+          type: object
+          properties:
+            connected:
+              type: boolean
+            lastSync:
+              type: string
+              format: date-time
+        gmail:
+          type: object
+          properties:
+            connected:
+              type: boolean
+            lastSync:
+              type: string
+              format: date-time
+
+  securitySchemes:
+    ClerkAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
