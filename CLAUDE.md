@@ -4,29 +4,102 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Meeting Phantom is currently in early setup phase on the `feature/setup` branch. The repository contains minimal documentation and no code infrastructure yet.
+Meeting Phantom Ultra is an AI assistant that joins Zoom meetings automatically, transcribes conversations in real-time, and sends email summaries with action items to meeting participants. Currently in specification-complete phase with production-ready architecture.
 
 ## Current State
 
-- Project is in initial setup phase
-- Contains only basic README.md and setup.md files
-- No package managers, build systems, or development tools configured yet
-- Working on `feature/setup` branch
+- **Branch**: `001-ai-assistant-that` (Spec Kit feature branch)
+- **Phase**: Post-specification, ready for implementation tasks generation
+- **Status**: Complete database schema, API contracts, testing strategy
+- **Architecture**: Production-grade Next.js fullstack application
 
-## Development Setup
+## Tech Stack (Decided & Validated)
 
-This project doesn't have established development commands or build processes yet. When setting up the development environment, common patterns to consider:
+- **Frontend**: Next.js with TypeScript
+- **Backend**: Next.js API Routes (fullstack approach)
+- **Database**: Supabase (managed PostgreSQL) with Prisma ORM
+- **Authentication**: Clerk (OAuth integration for Zoom/Gmail)
+- **Meeting Integration**: Zoom API + AssemblyAI transcription
+- **Email Delivery**: Gmail API
+- **Deployment**: Vercel (serverless)
 
-- Choose appropriate package manager (npm, yarn, pip, cargo, etc.) based on technology stack
-- Set up build and development scripts
-- Configure testing framework
-- Add linting and formatting tools
+## Architecture Overview
+
+### Database Schema (6 Entities)
+- User (auth + OAuth tokens)
+- Meeting (lifecycle tracking)
+- Transcript (AssemblyAI integration)
+- ActionItem (extracted tasks)
+- Summary (AI-generated overview)
+- Email (delivery tracking)
+
+### API Structure
+- `/api/auth/*` - Authentication & OAuth flows
+- `/api/meetings/*` - Meeting CRUD & webhook handling
+- `/api/webhooks/zoom` - Meeting lifecycle events
+
+### Key Integrations
+- **Zoom OAuth** - Meeting access & bot participation
+- **Gmail OAuth** - Email summary delivery
+- **AssemblyAI** - Real-time transcription with speaker ID
+- **OpenAI GPT-4** - Summary generation & action item extraction
+
+## Development Commands
+
+*Will be established during implementation phase*
+
+Development (planned)
+npm run dev # Next.js development server
+npm run build # Production build
+npm run test # Jest unit tests
+npm run test:e2e # Playwright integration tests
+
+Database (planned)
+npx prisma migrate dev # Run migrations
+npx prisma generate # Generate client
+npx prisma studio # Database GUI
+
+
+## MVP Constraints
+
+- **Timeline**: 3-week development cycle
+- **Scope**: Single-user accounts, English-only, Gmail-only
+- **Performance**: <200ms API responses
+- **Data Retention**: 30-day automatic cleanup
+- **Budget**: Free tier optimized (Vercel, Supabase, Clerk)
+
+## Testing Strategy
+
+- **Unit Tests**: Jest/Vitest for business logic
+- **Integration Tests**: Playwright for user workflows
+- **Contract Tests**: OpenAPI schema validation
+- **E2E Validation**: Complete quickstart guide (8-step user journey)
+
+## Key Files & Documentation
+
+- `specs/001-ai-assistant-that/spec.md` - Complete feature specification
+- `specs/001-ai-assistant-that/data-model.md` - Prisma database schema
+- `specs/001-ai-assistant-that/contracts/` - OpenAPI 3.0 API specifications
+- `specs/001-ai-assistant-that/quickstart.md` - End-to-end testing guide
+- `PROJECT_CONTEXT.md` - MVP scope and tech stack decisions
+- `FEATURES.md` - Implementation progress tracking
 
 ## Next Steps
 
-The codebase needs initial project structure and tooling setup. Future updates to this file should include:
+Ready for `/tasks` command to generate 20-25 implementation tasks with:
+- TDD approach (tests before implementation)
+- Dependency ordering (Database → Auth → APIs → UI)
+- Solo developer workflow optimization
+- 3-week MVP timeline focus
 
-- Build and development commands
-- Testing procedures
-- Code architecture overview
-- Project-specific conventions
+## Constitutional Requirements
+
+All development must maintain:
+- <200ms API response times
+- 80% test coverage minimum
+- Input validation and security
+- Consistent error handling
+- Production-ready code quality
+
+---
+*Last Updated: September 23, 2025 - Post-specification phase*
