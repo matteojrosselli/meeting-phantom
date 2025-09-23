@@ -8,26 +8,26 @@
 ## Execution Flow (main)
 ```
 1. Parse user description from Input
-   ’ If empty: ERROR "No feature description provided"
+   ï¿½ If empty: ERROR "No feature description provided"
 2. Extract key concepts from description
-   ’ Identify: actors, actions, data, constraints
+   ï¿½ Identify: actors, actions, data, constraints
 3. For each unclear aspect:
-   ’ Mark with [NEEDS CLARIFICATION: specific question]
+   ï¿½ Mark with [NEEDS CLARIFICATION: specific question]
 4. Fill User Scenarios & Testing section
-   ’ If no clear user flow: ERROR "Cannot determine user scenarios"
+   ï¿½ If no clear user flow: ERROR "Cannot determine user scenarios"
 5. Generate Functional Requirements
-   ’ Each requirement must be testable
-   ’ Mark ambiguous requirements
+   ï¿½ Each requirement must be testable
+   ï¿½ Mark ambiguous requirements
 6. Identify Key Entities (if data involved)
 7. Run Review Checklist
-   ’ If any [NEEDS CLARIFICATION]: WARN "Spec has uncertainties"
-   ’ If implementation details found: ERROR "Remove tech details"
+   ï¿½ If any [NEEDS CLARIFICATION]: WARN "Spec has uncertainties"
+   ï¿½ If implementation details found: ERROR "Remove tech details"
 8. Return: SUCCESS (spec ready for planning)
 ```
 
 ---
 
-## ¡ Quick Guidelines
+## ï¿½ Quick Guidelines
 -  Focus on WHAT users need and WHY
 - L Avoid HOW to implement (no tech stack, APIs, code structure)
 - =e Written for business stakeholders, not developers
@@ -49,6 +49,17 @@ When creating this spec from a user prompt:
    - Error handling behaviors
    - Integration requirements
    - Security/compliance needs
+
+---
+
+## Clarifications
+
+### Session 2025-09-23
+- Q: How long should meeting transcripts and summaries be stored before automatic deletion? â†’ A: 30 days (short-term storage for immediate follow-up)
+- Q: Which email services should be supported for sending meeting summaries? â†’ A: Gmail OAuth integration only for MVP
+- Q: What languages should the AI support for meeting transcription and processing? â†’ A: English only (simplest implementation)
+- Q: How should the system handle meeting recording consent and legal compliance? â†’ A: Auto-announce AI presence in meeting
+- Q: How should the system handle private or confidential meetings? â†’ A: User toggle to exclude specific meetings from AI attendance.
 
 ---
 
@@ -84,11 +95,11 @@ A business professional wants to focus on meeting discussions without worrying a
 - **FR-008**: System MUST send email summaries to all meeting participants automatically
 - **FR-009**: System MUST store meeting transcripts and summaries for user access
 - **FR-010**: System MUST provide a dashboard for users to view past meetings and summaries
-- **FR-011**: System MUST handle user privacy preferences and data retention [NEEDS CLARIFICATION: specific retention periods and privacy controls not specified]
-- **FR-012**: System MUST manage meeting access permissions [NEEDS CLARIFICATION: how to handle private/confidential meetings]
-- **FR-013**: System MUST authenticate with email providers to send summaries [NEEDS CLARIFICATION: which email services supported - Gmail, Outlook, etc.?]
-- **FR-014**: System MUST handle meeting recording consent [NEEDS CLARIFICATION: legal requirements vary by jurisdiction]
-- **FR-015**: System MUST process meetings in [NEEDS CLARIFICATION: supported languages not specified - English only or multilingual?]
+- **FR-011**: System MUST automatically delete meeting transcripts and summaries after 30 days to minimize data retention
+- **FR-012**: System MUST provide user controls to exclude specific meetings from AI attendance and processing
+- **FR-013**: System MUST authenticate with Gmail via OAuth to send meeting summaries
+- **FR-014**: System MUST automatically announce AI presence when joining meetings for transparency and consent
+- **FR-015**: System MUST process meetings in English language only
 
 ### Key Entities *(include if feature involves data)*
 - **User**: Meeting participant with Zoom account connection, email preferences, and dashboard access
