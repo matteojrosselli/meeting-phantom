@@ -20,6 +20,11 @@ AI assistant that joins Zoom meetings automatically, transcribes conversations i
 Running Spec Kit /plan phase to define exact MVP architecture
 
 ## Known Constraints
-- 3-week MVP timeline
 - Solo developer
 - Bootstrap budget (free tiers preferred)
+
+## Development Timeline
+- **Target**: 5-day intensive development sprint  
+- **Availability**: Full-time focused development (8-10 hours/day)
+- **Daily target**: 12-13 tasks per day with parallel batching
+- **Execution style**: Batch [P] tasks together for efficiency

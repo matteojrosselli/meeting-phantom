@@ -62,11 +62,13 @@ npx prisma studio # Database GUI
 
 ## MVP Constraints
 
-- **Timeline**: 3-week development cycle
+- **Timeline**: 5-day intensive development cycle (full-time focus)
 - **Scope**: Single-user accounts, English-only, Gmail-only
 - **Performance**: <200ms API responses
 - **Data Retention**: 30-day automatic cleanup
 - **Budget**: Free tier optimized (Vercel, Supabase, Clerk)
+- **Development Style**: High-velocity batching of parallel tasks
+
 
 ## Testing Strategy
 
