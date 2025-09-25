@@ -1,0 +1,166 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  clerkUserId       String    @unique
+  email             String    @unique
+  name              String
+  zoomConnected     Boolean   @default(false)
+  zoomAccessToken   String?
+  zoomRefreshToken  String?
+  gmailConnected    Boolean   @default(false)
+  gmailAccessToken  String?
+  gmailRefreshToken String?
+  preferences       Json      @default("{}")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  meetings          Meeting[]
+
+  @@map("users")
+}
+
+model Meeting {
+  id            String      @id @default(cuid())
+  userId        String
+  zoomMeetingId String
+  title         String
+  scheduledStart DateTime
+  actualStart   DateTime?
+  actualEnd     DateTime?
+  status        MeetingStatus @default(scheduled)
+  participants  Json        @default("[]")
+  meetingUrl    String
+  isExcluded    Boolean     @default(false)
+  botJoined     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transcript    Transcript?
+  summary       Summary?
+  actionItems   ActionItem[]
+  emails        Email[]
+
+  @@unique([userId, zoomMeetingId])
+  @@map("meetings")
+}
+
+model Transcript {
+  id            String            @id @default(cuid())
+  meetingId     String            @unique
+  assemblyAIId  String
+  status        TranscriptStatus  @default(processing)
+  language      String            @default("en")
+  speakers      Json              @default("[]")
+  segments      Json              @default("[]")
+  confidence    Float?
+  duration      Int?
+  wordCount     Int?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  meeting       Meeting           @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("transcripts")
+}
+
+model ActionItem {
+  id            String      @id @default(cuid())
+  meetingId     String
+  text          String
+  assignee      String?
+  dueDate       DateTime?
+  priority      Priority    @default(medium)
+  status        ActionStatus @default(pending)
+  confidence    Float
+  sourceSegment String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  meeting       Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("action_items")
+}
+
+model Summary {
+  id            String    @id @default(cuid())
+  meetingId     String    @unique
+  title         String
+  overview      String
+  keyPoints     Json      @default("[]")
+  decisions     Json      @default("[]")
+  nextSteps     Json      @default("[]")
+  attendees     Json      @default("[]")
+  aiModel       String
+  generatedAt   DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  meeting       Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("summaries")
+}
+
+model Email {
+  id              String      @id @default(cuid())
+  meetingId       String
+  recipientEmail  String
+  recipientName   String?
+  subject         String
+  status          EmailStatus @default(pending)
+  gmailMessageId  String?
+  sentAt          DateTime?
+  errorMessage    String?
+  retryCount      Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  meeting         Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@map("emails")
+}
+
+enum MeetingStatus {
+  scheduled
+  in_progress
+  completed
+  failed
+  skipped
+}
+
+enum TranscriptStatus {
+  processing
+  completed
+  failed
+}
+
+enum Priority {
+  low
+  medium
+  high
+}
+
+enum ActionStatus {
+  pending
+  completed
+  cancelled
+}
+
+enum EmailStatus {
+  pending
+  sent
+  failed
+  bounced
+}
