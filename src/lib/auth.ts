@@ -1,21 +1,21 @@
-import { auth } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
-export function getCurrentUserId() {
-  const { userId } = auth()
+export async function getCurrentUserId() {
+  const { userId } = await auth()
   if (!userId) {
     redirect('/sign-in')
   }
   return userId
 }
 
-export function getAuthData() {
-  const { userId, sessionId, getToken } = auth()
+export async function getAuthData() {
+  const { userId, sessionId, getToken } = await auth()
   return { userId, sessionId, getToken }
 }
 
 export async function requireAuth() {
-  const { userId } = auth()
+  const { userId } = await auth()
   if (!userId) {
     throw new Error('Unauthorized')
   }
