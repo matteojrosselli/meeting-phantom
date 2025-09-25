@@ -23,7 +23,7 @@ jest.mock('@clerk/nextjs', () => ({
 }))
 
 // Mock Prisma database
-jest.mock('@/lib/db', () => ({
+jest.mock('./src/lib/db', () => ({
   db: {
     user: {
       findUnique: jest.fn(),
