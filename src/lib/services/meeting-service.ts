@@ -1,5 +1,5 @@
 import { ServiceConfig } from './types'
-import { prisma } from '@/lib/db'
+import { db as prisma } from '@/lib/db'
 
 interface MeetingData {
   id?: string
