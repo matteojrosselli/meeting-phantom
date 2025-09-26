@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Meeting Phantom Ultra is an AI assistant that joins Zoom meetings automatically, transcribes conversations in real-time, and sends email summaries with action items to meeting participants. Currently in task execution phase with 64 implementation tasks ready for 5-day sprint.
+Meeting Phantom Ultra is an AI assistant that joins Zoom meetings automatically, transcribes conversations in real-time, and sends email summaries with action items to meeting participants. 
+
+**Current Status**: Phase 3.4 Integration Layer functionally complete (47/64 tasks, 73.4%) with **mock external APIs** + real infrastructure. Ready for Phase 3.5 Frontend Dashboard development.
 
 ## Current State
 
@@ -12,8 +14,9 @@ Meeting Phantom Ultra is an AI assistant that joins Zoom meetings automatically,
 - **Phase**: Phase 3.4 Integration Layer FUNCTIONALLY COMPLETE ✅ - Services connected to API endpoints
 - **Status**: Integration layer functionally complete, 47/64 tasks (73.4%) finished, service orchestration established
 - **Architecture**: Production-grade Next.js fullstack application with complete service integration
+- **API Strategy**: 🔄 **MOCK EXTERNAL APIs ACTIVE** (Zoom, AssemblyAI, Gmail, OpenAI) + Real infrastructure
 - **Sprint**: 5-day intensive development (12-13 tasks/day with parallel batching)
-- **Build**: ✅ Functionally complete with known technical debt for Phase 3.6
+- **Build**: ✅ Functionally complete with ⚠️ **documented technical debt** for Phase 3.6
 
 ## Tech Stack (Decided & Validated)
 
@@ -45,6 +48,22 @@ Meeting Phantom Ultra is an AI assistant that joins Zoom meetings automatically,
 - **Gmail OAuth** - Email summary delivery
 - **AssemblyAI** - Real-time transcription with speaker ID
 - **OpenAI GPT-4** - Summary generation & action item extraction
+
+### 🔄 **Mock API Strategy (Phase 3.4 Achievement)**
+
+**MOCK EXTERNAL APIs ACTIVE** (Production Transition Ready):
+- **Zoom API**: Mock client active, real OAuth token management via UserService
+- **AssemblyAI**: Mock transcription responses, real webhook processing pipeline  
+- **Gmail API**: Mock email delivery, real template system and OAuth storage
+- **OpenAI GPT-4**: Mock AI responses, real meeting processing workflow
+
+**🏢 REAL INFRASTRUCTURE COMPLETE**:
+- OAuth token management and storage (UserService)
+- Database connection pooling and error handling
+- Clerk authentication protection across all endpoints
+- Complete webhook processing pipeline (Zoom → MeetingProcessor)
+
+**🚀 PRODUCTION TRANSITION READY**: Easy swap to real API clients when credentials available
 
 ## Development Commands
 
@@ -95,22 +114,36 @@ Implementation progress: 47/64 tasks completed (73.4%) - Integration Layer funct
 - 📋 **T056-T064**: Polish, optimization, and deployment
 
 **Current Focus**: Phase 3.5 Frontend Dashboard
-- ✅ Integration layer: All services connected to API endpoints (real infrastructure, mock external APIs)
-- ✅ Service orchestration: Meeting processing workflow fully integrated (real webhook → mock transcription → mock AI → mock email)
-- ✅ Production-ready: Database connection pooling, error handling, authentication protection
-- 🎯 Frontend dashboard: User interface for meeting management and integration settings
+- ✅ **Real Infrastructure**: OAuth management, database pooling, authentication protection, webhook processing
+- ✅ **Mock External APIs**: Zoom, AssemblyAI, Gmail, OpenAI clients (production-transition ready)
+- ✅ **Service orchestration**: Complete meeting workflow (real webhook → mock transcription → mock AI → mock email)
+- 🎯 **Frontend dashboard**: User interface connecting to existing API endpoints
+- ⚠️ **Technical debt**: Documented and deferred to Phase 3.6 Polish
 
 **Execution Strategy**: 
-- ✅ Stable infrastructure foundation established
-- ✅ All API endpoints implemented with proper OAuth callback handling
-- ✅ TDD tests ready to validate service implementations
-- ✅ Mock-first approach for external API integrations
-- ✅ Core services layer complete with production-ready interfaces
-- 🎯 Target: Complete frontend dashboard before polish phase
+- ✅ **Mock-First Development**: External APIs mocked for rapid development without dependencies
+- ✅ **Production-Ready Interfaces**: Easy swap to real API clients when credentials available
+- ✅ **Real Infrastructure**: OAuth, database, authentication, webhook processing complete
+- ✅ **TDD Foundation**: Contract tests validate API implementations
+- 🎯 **Frontend Focus**: UI development leveraging completed backend infrastructure
 
-**Known Technical Debt (Phase 3.6 Polish)**:
-- meeting-service.ts enum alignment and Prisma schema field mapping
-- Path alias IDE warnings cleanup
+## ⚠️ **Technical Debt (Documented for Phase 3.6 Polish)**
+
+### 🔧 **Service Layer Refactoring**
+- **meeting-service.ts**: Enum alignment ("cancelled" vs "failed"), Prisma schema field mapping
+- **Database infrastructure**: Advanced connection pooling, comprehensive error handling
+- **Service orchestration**: Full error boundaries, logging, monitoring
+- **OAuth token management**: Advanced refresh/validation flows
+
+### 🔄 **External API Transition**
+- **Mock-to-Production Swapping**: Zoom, AssemblyAI, Gmail, OpenAI clients
+- **API rate limiting**: Production usage patterns
+- **Error handling**: Production-grade external API management
+
+### 💻 **Code Quality**
+- **Path aliases**: IDE warnings cleanup (@/lib/* imports)
+- **TypeScript**: Additional strict mode improvements
+- **ESLint**: Advanced production-ready rules
 
 ## Constitutional Requirements
 
@@ -122,4 +155,4 @@ All development must maintain:
 - Production-ready code quality
 
 ---
-*Last Updated: September 25, 2025 - Phase 3.4 Integration Layer functionally complete*
+*Last Updated: September 25, 2025 - Phase 3.4 Integration Layer functionally complete with mock external APIs + real infrastructure*
