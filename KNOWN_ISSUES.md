@@ -97,5 +97,22 @@
 - **Integration Success**: All services properly connected through middleware patterns
 - **Professional Discipline**: Scope violations detected and corrected with nuclear reset protocol
 
+## Essential Context Documentation Workflow
+
+**CRITICAL: Update ALL context files before any major milestone:**
+- specs/001-ai-assistant-that/tasks.md
+- FEATURES.md  
+- KNOWN_ISSUES.md
+- CLAUDE.md
+- PROJECT_CONTEXT.md
+- CODING_STANDARDS.md
+- constitution.md
+- setup.md
+- README.md
+
+**Nuclear Recovery Prevention:** Failure to maintain synchronized documentation creates context gaps that trigger scope violations and development setbacks. This checklist prevents the documentation drift that caused Phase 3.4 nuclear recovery.
+
+**Process:** Review and update all 9 files → Commit → Push → Continue development
+
 ---
 *Last Updated: September 25, 2025*
