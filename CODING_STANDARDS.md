@@ -52,6 +52,13 @@
 - Auto-format code using Prettier before commit
 - Comment complex logic but avoid redundant comments
 
+## Frontend Component Patterns (Phase 3.5 Established)
+- Next.js pages directory structure with Clerk authentication
+- TypeScript component interfaces with strict typing
+- Tailwind CSS responsive design with consistent color schemes
+- Reusable component architecture with error handling and loading states
+- API integration patterns with proper error boundaries
+
 ---
 
-> **Last updated:** September 25, 2025 - Phase 3.4 Integration Layer patterns established
+> **Last updated:** September 26, 2025 - Phase 3.5 Frontend patterns established
