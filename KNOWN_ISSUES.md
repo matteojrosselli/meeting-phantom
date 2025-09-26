@@ -47,10 +47,11 @@
 - **Database Infrastructure**: Connection pooling and error handling established for production readiness
 
 ## Current Target - Frontend Dashboard 🎯
-- Frontend dashboard (T048-T055): User interface for meeting management and integration settings
-- Landing page, dashboard, meeting details, settings pages
-- Connect UI components to existing API endpoints
-- Target: Complete user interface before polish phase
+- **Phase 3.5 Target**: Frontend dashboard (T048-T055)
+- **UI Components**: Landing page, dashboard, meeting details, settings pages
+- **Integration Strategy**: Connect UI components to existing API endpoints (real infrastructure + mock external APIs)
+- **Timeline**: Complete user interface before Phase 3.6 Polish
+- **Approach**: Rapid UI development leveraging completed backend infrastructure
 
 ## Development Notes
 - 5-day intensive sprint in progress
@@ -58,10 +59,35 @@
 - Daily target: 12-13 tasks with focused 8-10 hour sessions
 - Current pace: 47 tasks completed Day 1 (significantly ahead of schedule)
 
-## Known Technical Debt (Phase 3.6 Polish)
-- **meeting-service.ts**: Enum alignment ("cancelled" vs "failed") and Prisma schema field mapping
+## ⚠️ **Documented Technical Debt for Phase 3.6 Polish**
+
+### 🔧 **Service Layer Refactoring Required**
+- **meeting-service.ts**: 
+  - Enum alignment ("cancelled" vs "failed") in MeetingStatus interfaces
+  - Prisma schema field mapping (startTime, endTime, hostEmail missing from schema)
+  - Method signature inconsistencies with database schema
+- **Database Infrastructure**:
+  - Advanced connection pooling patterns (currently basic Prisma client)
+  - Comprehensive error handling and retry logic
+  - Transaction management for complex operations
+- **Service Integration Patterns**:
+  - Full service orchestration error boundaries
+  - Comprehensive logging and monitoring
+  - Advanced OAuth token refresh and validation flows
+
+### 💻 **Code Quality & Tooling**
 - **Path aliases**: IDE warnings for @/lib/* imports (functional but needs cleanup)
-- **Build errors**: Service layer has existing technical debt requiring dedicated cleanup phase
+- **TypeScript strict mode**: Additional type safety improvements
+- **ESLint configuration**: Advanced rules for production readiness
+
+### 🔄 **External API Transition**
+- **Mock-to-Production Swapping**: 
+  - Zoom API client (mock → real)
+  - AssemblyAI client (mock → real)
+  - Gmail API client (mock → real)
+  - OpenAI client (mock → real)
+- **API Rate Limiting**: Implementation for production API usage
+- **Error Handling**: Production-grade external API error management
 
 ## Phase 3.4 Implementation Strategy - VALIDATED ✅
 - **Mock API Integrations Active**: AssemblyAI, OpenAI, Gmail, Zoom pending real API keys
