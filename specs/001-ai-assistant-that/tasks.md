@@ -136,9 +136,9 @@
 - [x] T055 [P] IntegrationStatus component in components/IntegrationStatus.tsx
 
 ## Phase 3.6: Polish & Optimization
-- [ ] T056 [P] Unit tests for UserService in __tests__/services/user-service.test.ts
-- [ ] T057 [P] Unit tests for MeetingService in __tests__/services/meeting-service.test.ts
-- [ ] T058 [P] Unit tests for AI processing in __tests__/services/ai-service.test.ts
+- [x] T056 [P] Unit tests for UserService in __tests__/services/user-service.test.ts
+- [x] T057 [P] Unit tests for MeetingService in __tests__/services/meeting-service.test.ts
+- [x] T058 [P] Unit tests for AI processing in __tests__/services/ai-service.test.ts
 - [ ] T059 Performance tests for API endpoints (<200ms requirement)
 - [ ] T060 [P] Error boundary components for frontend error handling
 - [ ] T061 [P] Loading states and optimistic updates for better UX
