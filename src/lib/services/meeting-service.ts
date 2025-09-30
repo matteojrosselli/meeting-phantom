@@ -1,5 +1,5 @@
 import { ServiceConfig } from './types'
-import { db as prisma } from '@/lib/db'
+import { db } from '@/lib/db'
 
 interface MeetingData {
   id?: string
@@ -53,16 +53,16 @@ export class MeetingService {
    */
   async createMeeting(userId: string, meetingData: MeetingData): Promise<MeetingData> {
     try {
-      const meeting = await prisma.meeting.create({
+      const meeting = await db.meeting.create({
         data: {
           zoomMeetingId: meetingData.zoomMeetingId,
           title: meetingData.title,
-          startTime: meetingData.startTime,
-          endTime: meetingData.endTime,
-          hostEmail: meetingData.hostEmail,
+          scheduledStart: meetingData.startTime,
+          actualStart: meetingData.startTime,
+          actualEnd: meetingData.endTime,
+          meetingUrl: meetingData.recordingUrl || '',
           participants: meetingData.participants as any,
-          status: meetingData.status,
-          recordingUrl: meetingData.recordingUrl,
+          status: meetingData.status === 'cancelled' ? 'skipped' : meetingData.status,
           isExcluded: meetingData.isExcluded || false,
           userId
         }
@@ -72,12 +72,12 @@ export class MeetingService {
         id: meeting.id,
         zoomMeetingId: meeting.zoomMeetingId,
         title: meeting.title,
-        startTime: meeting.startTime,
-        endTime: meeting.endTime || undefined,
-        hostEmail: meeting.hostEmail,
+        startTime: meeting.scheduledStart,
+        endTime: meeting.actualEnd || undefined,
+        hostEmail: '',
         participants: (meeting.participants as any) || [],
         status: meeting.status as any,
-        recordingUrl: meeting.recordingUrl || undefined,
+        recordingUrl: meeting.meetingUrl || undefined,
         isExcluded: meeting.isExcluded
       }
     } catch (error) {
@@ -91,7 +91,7 @@ export class MeetingService {
    */
   async getMeetingById(meetingId: string, userId: string): Promise<MeetingData | null> {
     try {
-      const meeting = await prisma.meeting.findFirst({
+      const meeting = await db.meeting.findFirst({
         where: {
           id: meetingId,
           userId
@@ -104,12 +104,12 @@ export class MeetingService {
         id: meeting.id,
         zoomMeetingId: meeting.zoomMeetingId,
         title: meeting.title,
-        startTime: meeting.startTime,
-        endTime: meeting.endTime || undefined,
-        hostEmail: meeting.hostEmail,
+        startTime: meeting.scheduledStart,
+        endTime: meeting.actualEnd || undefined,
+        hostEmail: '',
         participants: (meeting.participants as any) || [],
         status: meeting.status as any,
-        recordingUrl: meeting.recordingUrl || undefined,
+        recordingUrl: meeting.meetingUrl || undefined,
         isExcluded: meeting.isExcluded
       }
     } catch (error) {
@@ -123,7 +123,7 @@ export class MeetingService {
    */
   async getMeetingByZoomId(zoomMeetingId: string, userId: string): Promise<MeetingData | null> {
     try {
-      const meeting = await prisma.meeting.findFirst({
+      const meeting = await db.meeting.findFirst({
         where: {
           zoomMeetingId,
           userId
@@ -136,12 +136,12 @@ export class MeetingService {
         id: meeting.id,
         zoomMeetingId: meeting.zoomMeetingId,
         title: meeting.title,
-        startTime: meeting.startTime,
-        endTime: meeting.endTime || undefined,
-        hostEmail: meeting.hostEmail,
+        startTime: meeting.scheduledStart,
+        endTime: meeting.actualEnd || undefined,
+        hostEmail: '',
         participants: (meeting.participants as any) || [],
         status: meeting.status as any,
-        recordingUrl: meeting.recordingUrl || undefined,
+        recordingUrl: meeting.meetingUrl || undefined,
         isExcluded: meeting.isExcluded
       }
     } catch (error) {
@@ -164,7 +164,7 @@ export class MeetingService {
       if (updates.isExcluded !== undefined) updateData.isExcluded = updates.isExcluded
       if (updates.participants !== undefined) updateData.participants = updates.participants
 
-      const meeting = await prisma.meeting.update({
+      const meeting = await db.meeting.update({
         where: {
           id: meetingId,
           userId
@@ -176,12 +176,12 @@ export class MeetingService {
         id: meeting.id,
         zoomMeetingId: meeting.zoomMeetingId,
         title: meeting.title,
-        startTime: meeting.startTime,
-        endTime: meeting.endTime || undefined,
-        hostEmail: meeting.hostEmail,
+        startTime: meeting.scheduledStart,
+        endTime: meeting.actualEnd || undefined,
+        hostEmail: '',
         participants: (meeting.participants as any) || [],
         status: meeting.status as any,
-        recordingUrl: meeting.recordingUrl || undefined,
+        recordingUrl: meeting.meetingUrl || undefined,
         isExcluded: meeting.isExcluded
       }
     } catch (error) {
@@ -215,9 +215,9 @@ export class MeetingService {
         whereClause.isExcluded = false
       }
 
-      const meetings = await prisma.meeting.findMany({
+      const meetings = await db.meeting.findMany({
         where: whereClause,
-        orderBy: { startTime: 'desc' },
+        orderBy: { scheduledStart: 'desc' },
         take: limit,
         skip: offset
       })
@@ -226,12 +226,12 @@ export class MeetingService {
         id: meeting.id,
         zoomMeetingId: meeting.zoomMeetingId,
         title: meeting.title,
-        startTime: meeting.startTime,
-        endTime: meeting.endTime || undefined,
-        hostEmail: meeting.hostEmail,
+        startTime: meeting.scheduledStart,
+        endTime: meeting.actualEnd || undefined,
+        hostEmail: '',
         participants: (meeting.participants as any) || [],
         status: meeting.status as any,
-        recordingUrl: meeting.recordingUrl || undefined,
+        recordingUrl: meeting.meetingUrl || undefined,
         isExcluded: meeting.isExcluded
       }))
     } catch (error) {
@@ -245,7 +245,7 @@ export class MeetingService {
    */
   async deleteMeeting(meetingId: string, userId: string): Promise<boolean> {
     try {
-      await prisma.meeting.update({
+      await db.meeting.update({
         where: {
           id: meetingId,
           userId
@@ -277,23 +277,23 @@ export class MeetingService {
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
       const [total, completed, inProgress, scheduled, thisWeek] = await Promise.all([
-        prisma.meeting.count({
+        db.meeting.count({
           where: { userId, isExcluded: false }
         }),
-        prisma.meeting.count({
+        db.meeting.count({
           where: { userId, status: 'completed', isExcluded: false }
         }),
-        prisma.meeting.count({
+        db.meeting.count({
           where: { userId, status: 'in_progress', isExcluded: false }
         }),
-        prisma.meeting.count({
+        db.meeting.count({
           where: { userId, status: 'scheduled', isExcluded: false }
         }),
-        prisma.meeting.count({
+        db.meeting.count({
           where: {
             userId,
             isExcluded: false,
-            startTime: {
+            scheduledStart: {
               gte: weekAgo
             }
           }
@@ -327,7 +327,7 @@ export class MeetingService {
       const updateData: any = { status }
       if (endTime) updateData.endTime = endTime
 
-      await prisma.meeting.updateMany({
+      await db.meeting.updateMany({
         where: { zoomMeetingId },
         data: updateData
       })

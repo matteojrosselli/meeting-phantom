@@ -1,5 +1,5 @@
 import { ServiceConfig } from './types'
-import { prisma } from '@/lib/db'
+import { db } from '@/lib/db'
 
 interface UserTokens {
   zoomAccessToken?: string
@@ -12,7 +12,7 @@ interface UserTokens {
 
 interface UserProfile {
   id: string
-  clerkId: string
+  clerkUserId: string
   email: string
   firstName?: string
   lastName?: string
@@ -34,34 +34,33 @@ export class UserService {
   /**
    * Get or create user profile from Clerk ID
    */
-  async getOrCreateUser(clerkId: string, email: string, firstName?: string, lastName?: string): Promise<UserProfile> {
+  async getOrCreateUser(clerkUserId: string, email: string, firstName?: string, lastName?: string): Promise<UserProfile> {
     try {
-      let user = await prisma.user.findUnique({
-        where: { clerkId }
+      let user = await db.user.findUnique({
+        where: { clerkUserId }
       })
 
       if (!user) {
-        user = await prisma.user.create({
+        user = await db.user.create({
           data: {
-            clerkId,
+            clerkUserId,
             email,
-            firstName,
-            lastName
+            name: `${firstName} ${lastName}`.trim()
           }
         })
       }
 
       return {
         id: user.id,
-        clerkId: user.clerkId,
+        clerkUserId: user.clerkUserId,
         email: user.email,
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
+        firstName: user.name.split(' ')[0] || undefined,
+        lastName: user.name.split(' ').slice(1).join(' ') || undefined,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         integrations: {
-          zoom: !!(user.zoomAccessToken && user.zoomExpiresAt && user.zoomExpiresAt > new Date()),
-          gmail: !!(user.gmailAccessToken && user.gmailExpiresAt && user.gmailExpiresAt > new Date())
+          zoom: !!(user.zoomAccessToken && user.zoomRefreshToken),
+          gmail: !!(user.gmailAccessToken && user.gmailRefreshToken)
         }
       }
     } catch (error) {
@@ -73,24 +72,24 @@ export class UserService {
   /**
    * Update user profile information
    */
-  async updateProfile(clerkId: string, updates: Partial<Pick<UserProfile, 'firstName' | 'lastName' | 'email'>>): Promise<UserProfile> {
+  async updateProfile(clerkUserId: string, updates: Partial<Pick<UserProfile, 'firstName' | 'lastName' | 'email'>>): Promise<UserProfile> {
     try {
-      const user = await prisma.user.update({
-        where: { clerkId },
+      const user = await db.user.update({
+        where: { clerkUserId },
         data: updates
       })
 
       return {
         id: user.id,
-        clerkId: user.clerkId,
+        clerkUserId: user.clerkUserId,
         email: user.email,
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
+        firstName: user.name.split(' ')[0] || undefined,
+        lastName: user.name.split(' ').slice(1).join(' ') || undefined,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         integrations: {
-          zoom: !!(user.zoomAccessToken && user.zoomExpiresAt && user.zoomExpiresAt > new Date()),
-          gmail: !!(user.gmailAccessToken && user.gmailExpiresAt && user.gmailExpiresAt > new Date())
+          zoom: !!(user.zoomAccessToken && user.zoomRefreshToken),
+          gmail: !!(user.gmailAccessToken && user.gmailRefreshToken)
         }
       }
     } catch (error) {
@@ -102,7 +101,7 @@ export class UserService {
   /**
    * Store OAuth tokens for integrations
    */
-  async storeTokens(clerkId: string, provider: 'zoom' | 'gmail', tokens: UserTokens): Promise<void> {
+  async storeTokens(clerkUserId: string, provider: 'zoom' | 'gmail', tokens: UserTokens): Promise<void> {
     try {
       const updateData: any = {}
 
@@ -116,8 +115,8 @@ export class UserService {
         updateData.gmailExpiresAt = tokens.gmailExpiresAt
       }
 
-      await prisma.user.update({
-        where: { clerkId },
+      await db.user.update({
+        where: { clerkUserId },
         data: updateData
       })
     } catch (error) {
@@ -129,28 +128,28 @@ export class UserService {
   /**
    * Get valid OAuth tokens for a provider
    */
-  async getValidTokens(clerkId: string, provider: 'zoom' | 'gmail'): Promise<UserTokens | null> {
+  async getValidTokens(clerkUserId: string, provider: 'zoom' | 'gmail'): Promise<UserTokens | null> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { clerkId }
+      const user = await db.user.findUnique({
+        where: { clerkUserId }
       })
 
       if (!user) return null
 
       if (provider === 'zoom') {
-        if (user.zoomAccessToken && user.zoomExpiresAt && user.zoomExpiresAt > new Date()) {
+        if (user.zoomAccessToken && user.zoomRefreshToken) {
           return {
             zoomAccessToken: user.zoomAccessToken,
             zoomRefreshToken: user.zoomRefreshToken || undefined,
-            zoomExpiresAt: user.zoomExpiresAt
+            zoomExpiresAt: undefined
           }
         }
       } else if (provider === 'gmail') {
-        if (user.gmailAccessToken && user.gmailExpiresAt && user.gmailExpiresAt > new Date()) {
+        if (user.gmailAccessToken && user.gmailRefreshToken) {
           return {
             gmailAccessToken: user.gmailAccessToken,
             gmailRefreshToken: user.gmailRefreshToken || undefined,
-            gmailExpiresAt: user.gmailExpiresAt
+            gmailExpiresAt: undefined
           }
         }
       }
@@ -165,7 +164,7 @@ export class UserService {
   /**
    * Disconnect an integration by clearing tokens
    */
-  async disconnectIntegration(clerkId: string, provider: 'zoom' | 'gmail'): Promise<void> {
+  async disconnectIntegration(clerkUserId: string, provider: 'zoom' | 'gmail'): Promise<void> {
     try {
       const updateData: any = {}
 
@@ -179,8 +178,8 @@ export class UserService {
         updateData.gmailExpiresAt = null
       }
 
-      await prisma.user.update({
-        where: { clerkId },
+      await db.user.update({
+        where: { clerkUserId },
         data: updateData
       })
     } catch (error) {
@@ -192,10 +191,10 @@ export class UserService {
   /**
    * Get integration status for user
    */
-  async getIntegrationStatus(clerkId: string): Promise<{ zoom: boolean; gmail: boolean }> {
+  async getIntegrationStatus(clerkUserId: string): Promise<{ zoom: boolean; gmail: boolean }> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { clerkId }
+      const user = await db.user.findUnique({
+        where: { clerkUserId }
       })
 
       if (!user) {
@@ -203,8 +202,8 @@ export class UserService {
       }
 
       return {
-        zoom: !!(user.zoomAccessToken && user.zoomExpiresAt && user.zoomExpiresAt > new Date()),
-        gmail: !!(user.gmailAccessToken && user.gmailExpiresAt && user.gmailExpiresAt > new Date())
+        zoom: !!(user.zoomAccessToken && user.zoomRefreshToken),
+        gmail: !!(user.gmailAccessToken && user.gmailRefreshToken)
       }
     } catch (error) {
       console.error('Failed to get integration status:', error)

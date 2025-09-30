@@ -217,7 +217,7 @@ export default function TranscriptViewer({
       <div className="text-sm text-gray-500">
         Showing {filteredSegments.length} of {segments.length} segment{segments.length !== 1 ? 's' : ''}
         {searchTerm && (
-          <span> matching "{searchTerm}"</span>
+          <span> matching &quot;{searchTerm}&quot;</span>
         )}
         {selectedSpeaker !== 'all' && (
           <span> from {selectedSpeaker}</span>
@@ -237,7 +237,7 @@ export default function TranscriptViewer({
           return (
             <div
               key={originalIndex}
-              ref={(el) => segmentRefs.current[originalIndex] = el}
+              ref={(el) => { segmentRefs.current[originalIndex] = el }}
               className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
             >
               <div className="flex items-start justify-between mb-3">

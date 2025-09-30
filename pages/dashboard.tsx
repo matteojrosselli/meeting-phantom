@@ -1,6 +1,6 @@
 import { useUser, UserButton } from '@clerk/nextjs'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 
 type MeetingStatus = 'scheduled' | 'in_progress' | 'completed' | 'failed' | 'skipped'
@@ -61,13 +61,7 @@ export default function Dashboard() {
     }
   }, [isSignedIn, isLoaded, router])
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchMeetings()
-    }
-  }, [isSignedIn, filter])
-
-  const fetchMeetings = async () => {
+  const fetchMeetings = useCallback(async () => {
     try {
       setLoading(true)
       const queryParams = new URLSearchParams()
@@ -89,7 +83,13 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchMeetings()
+    }
+  }, [isSignedIn, fetchMeetings])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
