@@ -67,3 +67,4 @@ prisma/migrations/
 *.key
 *.pem
 .secrets/
+.env.local
